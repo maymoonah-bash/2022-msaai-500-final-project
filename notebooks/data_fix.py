@@ -1,3 +1,14 @@
+###################################################################################
+# The purpose of this script is to preprocess the given car data
+#   It does so by using an initial sanitization sweep
+#   Then it uses individual sanitize processors for the different columns
+#
+# Contributors:
+#   Christopher J. Watson
+#   Bin Lu
+#   Maimuna Bashir
+###################################################################################
+
 import re
 import tkinter as tk
 from tkinter import filedialog
@@ -5,10 +16,11 @@ import csv
 import pandas as pd
 from IPython.display import display
 
+# This dictionary stores the sanitize functions
 sanitize_dict = {}
 
 
-# Row Sanitize Functions
+# Column Sanitize Functions
 def id_col_preprocess(value):
     regex = "[^0-9]"
     clean_str = re.sub(regex, '', value)
@@ -33,6 +45,7 @@ def do_nothing(value):
     return value
 
 
+# Initialization Measures
 def init():
     global sanitize_dict
     # add all definitions
@@ -44,6 +57,7 @@ def init():
                      'Airbags': do_nothing}
 
 
+# File Scrubbing Function
 def scrub_txt_file():
     # THIS SECTION SCRUBS SPECIAL CHARACTERS FROM THE ENTIRE FILE
     # get the file path
@@ -64,9 +78,11 @@ def scrub_txt_file():
     print(clean_file)
 
     # THIS SECTION CALLS THE SANITIZE METHODS
+    # create working variables
     first_row = True
     df_1 = []
     tmp_a_1 = []
+    # open the cleaner file for processing
     with open(clean_file, 'rt', encoding="utf8") as f:
         # list to store the names of columns
         list_of_column_names = []
@@ -74,18 +90,19 @@ def scrub_txt_file():
         # loop to iterate through the rows of csv
         for xrow in reader:
             if first_row:
-                # adding the first row
+                # adding the first row header
                 for col in xrow:
                     col = col.replace(' ', '_')
                     col = col.replace('.', '')
                     list_of_column_names.append(col)
                 list_of_column_names.append("Turbo")
+                # set the flag to continue
                 first_row = False
-                # breaking the loop after the
-                # first iteration itself
             else:
+                # create a storing dictionary
                 temp_values = {}
                 row_temp = xrow
+                # sort the columns through the various preprocessors
                 for xcol in range(len(list_of_column_names)-1):
                     if list_of_column_names[xcol] == 'Engine_volume':
                         # account for turbo expansion
@@ -95,11 +112,15 @@ def scrub_txt_file():
                     else:
                         temp_values[list_of_column_names[xcol]] = \
                             sanitize_dict[list_of_column_names[xcol]](row_temp[xcol])
+                # add dictionary to dictionary list
                 tmp_a_1.append(temp_values)
+        # move it all to a panda dataframe
         df_1 = pd.json_normalize(tmp_a_1)
+        # return data for usage in other applications
         return df_1
 
 
+# General Save Function
 def save_file_string(out_string):
     fd = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
     if fd is None:
@@ -113,7 +134,7 @@ def main():
     # sets up the variables needed for run
     print("Setting Up Variables")
     init()
-    print("Entering scrubbing methods")
+    print("Entering Scrubbing Methods")
     # scrub the output
     display(scrub_txt_file())
 
