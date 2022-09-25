@@ -55,7 +55,7 @@ def scrub_txt_file():
     print("Replacing all special characters for clean read")
     bad_string = open(file_path, encoding="utf8").read()
     # create regex that only gets basic characters
-    regex = "[^a-zA-Z0-9\n\.\,\- ]"
+    regex = "[^a-zA-Z0-9\n\.\,\-\"]"
     clean_str = re.sub(regex, ' ', bad_string)
     # write out sanitized file
     print("Asking for cleaned data file save location")
@@ -70,39 +70,31 @@ def scrub_txt_file():
     with open(clean_file, 'rt', encoding="utf8") as f:
         # list to store the names of columns
         list_of_column_names = []
-        reader = csv.reader(f, delimiter=';')
+        reader = csv.reader(f, skipinitialspace=True, quotechar='"')
         # loop to iterate through the rows of csv
-        for row in reader:
+        for xrow in reader:
             if first_row:
                 # adding the first row
-                row_temp = str(row)
-                row_temp = row_temp.replace('"', '')
-                row_temp = row_temp.replace('.', '')
-                row_temp = row_temp.replace(']', '')
-                row_temp = row_temp.replace('[', '')
-                row_temp = row_temp.replace('\'', '')
-                row_temp = row_temp.replace(' ', '_')
-                row_temp = [x.strip() for x in row_temp.split(',')]
-                list_of_column_names = row_temp
+                for col in xrow:
+                    col = col.replace(' ', '_')
+                    col = col.replace('.', '')
+                    list_of_column_names.append(col)
                 list_of_column_names.append("Turbo")
                 first_row = False
                 # breaking the loop after the
                 # first iteration itself
             else:
                 temp_values = {}
-                row_temp = str(row)
-                row_temp = row_temp.replace('\'', '')
-                row_temp = row_temp.replace(']', '')
-                row_temp = [x.strip() for x in row_temp.split(',')]
+                row_temp = xrow
                 for xcol in range(len(list_of_column_names)-1):
                     if list_of_column_names[xcol] == 'Engine_volume':
                         # account for turbo expansion
                         t1 = sanitize_dict[list_of_column_names[xcol]](row_temp[xcol])
-                        temp_values[list_of_column_names[xcol]] = [t1[0]]
-                        temp_values[list_of_column_names[len(list_of_column_names)-1]] = [t1[1]]
+                        temp_values[list_of_column_names[xcol]] = t1[0]
+                        temp_values[list_of_column_names[len(list_of_column_names)-1]] = t1[1]
                     else:
                         temp_values[list_of_column_names[xcol]] = \
-                            [sanitize_dict[list_of_column_names[xcol]](row_temp[xcol])]
+                            sanitize_dict[list_of_column_names[xcol]](row_temp[xcol])
                 tmp_a_1.append(temp_values)
         df_1 = pd.json_normalize(tmp_a_1)
         return df_1
