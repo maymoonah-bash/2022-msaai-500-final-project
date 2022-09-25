@@ -62,6 +62,7 @@ def scrub_txt_file():
     clean_file = save_file_string(clean_str)
     print("Printing save location:")
     print(clean_file)
+
     # THIS SECTION CALLS THE SANITIZE METHODS
     first_row = True
     df_1 = []
