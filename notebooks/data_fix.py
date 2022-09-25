@@ -29,15 +29,12 @@ def engine_col_preprocess(value):
 
 
 def do_nothing(value):
-    print("not implemented")
+    # print("not implemented")
     return value
 
 
-def init(root):
+def init():
     global sanitize_dict
-    # init windows stuff
-    root = tk.Tk()
-    root.withdraw()
     # add all definitions
     sanitize_dict = {'ID': id_col_preprocess, 'Price': price_levy_col_preprocess, 'Levy': price_levy_col_preprocess,
                      'Manufacturer': do_nothing, 'Model': do_nothing, 'Prod_year': do_nothing, 'Category': do_nothing,
@@ -47,9 +44,12 @@ def init(root):
                      'Airbags': do_nothing}
 
 
-def scrub_txt_file(root):
+def scrub_txt_file():
     # THIS SECTION SCRUBS SPECIAL CHARACTERS FROM THE ENTIRE FILE
     # get the file path
+    # init windows stuff
+    root = tk.Tk()
+    root.withdraw()
     print("Asking for original data file path")
     file_path = filedialog.askopenfilename()
     print("Replacing all special characters for clean read")
@@ -59,7 +59,7 @@ def scrub_txt_file(root):
     clean_str = re.sub(regex, ' ', bad_string)
     # write out sanitized file
     print("Asking for cleaned data file save location")
-    clean_file = save_file(clean_str, root)
+    clean_file = save_file_string(clean_str)
     print("Printing save location:")
     print(clean_file)
     # THIS SECTION CALLS THE SANITIZE METHODS
@@ -104,11 +104,10 @@ def scrub_txt_file(root):
                             [sanitize_dict[list_of_column_names[xcol]](row_temp[xcol])]
                 tmp_a_1.append(temp_values)
         df_1 = pd.json_normalize(tmp_a_1)
-        display(df_1)
+        return df_1
 
 
-
-def save_file(out_string,root):
+def save_file_string(out_string):
     fd = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
     if fd is None:
         return
@@ -120,12 +119,10 @@ def save_file(out_string,root):
 def main():
     # sets up the variables needed for run
     print("Setting Up Variables")
-    root = ''
-    sanitize_dict = ''
-    init(root)
+    init()
     print("Entering scrubbing methods")
-    #scrub the output
-    scrub_txt_file(root)
+    # scrub the output
+    display(scrub_txt_file())
 
 
 if __name__ == "__main__":
