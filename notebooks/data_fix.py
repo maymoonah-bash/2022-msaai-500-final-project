@@ -69,7 +69,7 @@ def init():
                      'Leather_interior': do_nothing, 'Fuel_type': do_nothing, 'Engine_volume': engine_col_preprocess,
                      'Mileage': do_nothing, 'Cylinders': do_nothing, 'Gear_box_type': do_nothing,
                      'Drive_wheels': drive_weels, 'Doors': doors, 'Wheel': do_nothing, 'Color': do_nothing,
-                     'Airbags': do_nothing}
+                     'Airbags': do_nothing} 
 
 
 # File Scrubbing Function
